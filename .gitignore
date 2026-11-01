@@ -1,0 +1,11 @@
+# Build artifacts
+*.iso
+out/
+tmp/
+
+# Secrets
+.env
+.secrets
+
+# Shared checks checkout
+.ci/

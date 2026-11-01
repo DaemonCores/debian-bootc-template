@@ -1,0 +1,3 @@
+Everything under src/overlay is copied to / in the image by the COPY line of the
+Containerfile. Delete this example and put your own files here (configuration,
+systemd units, scripts).

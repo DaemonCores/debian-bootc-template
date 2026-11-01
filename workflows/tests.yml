@@ -1,0 +1,46 @@
+# Image tests, run on a real boot of the built image (bootc install to a virtual
+# disk + QEMU/KVM), executed over SSH before the image is pushed. A failing test
+# blocks the push.
+#
+#   boot_timeout      seconds to wait for the VM to answer SSH
+#   reboot_timeout    seconds to wait for the VM to answer SSH again after a reboot
+#   tests[].name      label shown in the CI log
+#   tests[].run       command executed on the VM; passes on exit 0
+#   tests[].expect    optional: pass instead when this string is in the output
+#   tests[].diag      REQUIRED: command run over SSH when this test fails, to
+#                     capture the runtime state behind the failure. The harness
+#                     refuses to run (fails the build) if any test lacks a diag,
+#                     so a failure can never be undiagnosable.
+
+boot_timeout: 900
+reboot_timeout: 300
+
+tests:
+  # ── base (inherited from debian-bootc) ─────────────────────────────────
+  - name: booted through bootc
+    run: bootc status --format=json
+    expect: booted
+    diag: |
+      bootc status 2>&1 | head -n 30
+      echo "--- boot journal tail ---"
+      journalctl -b --no-pager 2>&1 | tail -n 30
+  - name: root is a composefs/overlay mount
+    run: findmnt -no FSTYPE / | grep -qiE 'overlay|composefs'
+    diag: |
+      findmnt / 2>&1
+      echo "--- /proc/cmdline ---"; cat /proc/cmdline 2>&1
+  - name: no failed systemd units
+    run: test "$(systemctl --failed --no-legend | wc -l)" -eq 0
+    diag: |
+      systemctl --failed --no-pager 2>&1
+
+  # ── your image ─────────────────────────────────────────────────────────
+  - name: example package installed
+    run: test -f /usr/share/example-package/README
+    diag: |
+      dpkg -l example-package 2>&1
+      ls -la /usr/share/example-package/ 2>&1
+  - name: example overlay file present
+    run: test -f /usr/share/example-overlay/README
+    diag: |
+      ls -la /usr/share/example-overlay/ 2>&1

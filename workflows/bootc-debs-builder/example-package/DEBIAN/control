@@ -1,0 +1,13 @@
+Source: example-package
+Package: example-package
+Version: {{ VER }}
+Architecture: all
+Maintainer: Your Name <you@example.org>
+Section: misc
+Priority: optional
+Depends: {{ DEPS }}
+Description: example package of the DaemonCores template
+ Ships one text file under /usr/share/example-package. Replace this package
+ with your own: the directory mirrors the final layout of the package, and this
+ control file is its metadata. {{ VER }} and {{ DEPS }} are filled in by the
+ builder.

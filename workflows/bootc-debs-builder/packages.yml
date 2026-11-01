@@ -1,0 +1,39 @@
+# Package manifest for the .deb builder: one entry per package CLASS.
+#
+# The variants mechanism expands one build script across every package of the
+# class, so adding a package is a few lines under `variants`, not a new job.
+# Each variant is built from the directory of the same name next to this file
+# (`variant-source: "{variant}"`), and published to this repository's own APT
+# repository (https://<owner>.github.io/<repo>), which every Containerfile can
+# use with a plain `apt install <name>` (see Containerfile.base).
+#
+# Classes available in the shared helpers (DaemonCores-CI scripts/deb_helpers.sh,
+# imported implicitly, no plumbing needed in the build blocks):
+#   custom        package a directory tree you wrote: DEBIAN/control + the files
+#                 at their final path (usr/, etc/...). This template uses it.
+#   repacked      take a Debian package, apply patches/overlay, republish it
+#                 under a +suffix version (deb_repack).
+#   overlay-tree  same for a tree of files laid over an upstream package
+#                 (deb_overlay_tree).
+# See the DaemonCores-VE repository for large examples of all of them, including
+# source builds and kernels.
+#
+# HELPERS_VER is hashed per entry; bump it whenever the DaemonCores-CI deb
+# helpers change (that repository is invisible to the content hash).
+packages:
+  - name: custom
+    variant-env: PKG
+    variant-source: "{variant}"
+    env:
+      HELPERS_VER: 6
+    build: |
+      deb_custom "${PKG}" "${PKG_VER}" "${PKG}"
+    deb-glob: "{variant}_*"
+    variants:
+      # Replace this example with your own packages (and the directory of the
+      # same name next to this file). {{ VER }} and {{ DEPS }} in DEBIAN/control
+      # are filled in by the builder.
+      example-package:
+        env:
+          PKG: example-package
+          PKG_VER: 1.0.0

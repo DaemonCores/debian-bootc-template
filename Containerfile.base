@@ -1,0 +1,49 @@
+#####################################################################################
+# Shared base: debian-bootc + this repository's own APT repository
+#####################################################################################
+# The shared image pipeline (DaemonCores-CI/.github/workflows/bootc-build.yml)
+# builds this file once per build job as localhost/debian-bootc-base and passes
+# it to every Containerfile of the repo as BASE_IMAGE. It is never pushed.
+#
+# You normally never edit this file. It makes the repository's OWN APT
+# repository (the .deb packages built from workflows/bootc-debs-builder) usable
+# from every Containerfile, so that `apt install <your-package>` just works:
+#
+#   BOOTC_APT_URL       base URL of the repository the pipeline publishes
+#                       (https://<owner>.github.io/<repo>), derived by the CI
+#   BOOTC_GPG_SHA256    SHA-256 of its public signing key, derived by the CI from
+#                       the APT_GPG_KEY secret
+#
+# Both are empty until the repository has a signing key; the repository is then
+# simply not configured, and the Containerfiles only see the Debian and
+# debian-bootc packages. Nothing here is a default to override: no URL, key hash
+# or repository name is written in this repository.
+#
+# The FROM line feeds the image content hash (the base digest is part of the
+# identity), so a newer published base invalidates the cached image.
+FROM ghcr.io/daemoncores/debian-bootc:latest
+STOPSIGNAL SIGRTMIN+3
+ENV DEBIAN_FRONTEND=noninteractive
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
+# Product display name, injected by the CI from the repo name (dashes -> spaces).
+# bootc-finalize brands the UEFI boot-entry label with it; empty keeps the value
+# inherited from debian-bootc.
+ARG PRODUCT_NAME=""
+ARG BOOTC_APT_URL=""
+ARG BOOTC_GPG_SHA256=""
+
+RUN mkdir -p /usr/lib/bootc \
+    && { [ -z "${PRODUCT_NAME}" ] \
+        || printf '%s' "${PRODUCT_NAME}" > /usr/lib/bootc/product-name; } \
+    && if [ -n "${BOOTC_APT_URL}" ] && [ -n "${BOOTC_GPG_SHA256}" ]; then \
+        url="${BOOTC_APT_URL%/}"; \
+        name="${url##*/}"; \
+        keyring="/usr/share/keyrings/${name}-keyring.gpg"; \
+        . /etc/os-release; \
+        wget -O "${keyring}" "${url}/gpg.key" \
+        && printf '%s  %s\n' "${BOOTC_GPG_SHA256}" "${keyring}" | sha256sum -c - \
+        && printf 'Types: deb\nArchitectures: %s\nURIs: %s/\nSuites: %s\nComponents: main\nEnabled: yes\nSigned-By: %s\n' \
+            "$(dpkg --print-architecture)" "${url}" "${VERSION_CODENAME}" "${keyring}" \
+            > "/etc/apt/sources.list.d/${name}.sources"; \
+    fi
