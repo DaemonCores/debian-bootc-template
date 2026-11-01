@@ -21,6 +21,9 @@
 #
 # The FROM line feeds the image content hash (the base digest is part of the
 # identity), so a newer published base invalidates the cached image.
+# `latest` on purpose: this image follows the published base, and its digest is
+# part of the content hash above, so a new base rebuilds the image.
+# hadolint ignore=DL3007
 FROM ghcr.io/daemoncores/debian-bootc:latest
 STOPSIGNAL SIGRTMIN+3
 ENV DEBIAN_FRONTEND=noninteractive
@@ -41,7 +44,7 @@ RUN mkdir -p /usr/lib/bootc \
         name="${url##*/}"; \
         keyring="/usr/share/keyrings/${name}-keyring.gpg"; \
         . /etc/os-release; \
-        wget -O "${keyring}" "${url}/gpg.key" \
+        wget -nv -O "${keyring}" "${url}/gpg.key" \
         && printf '%s  %s\n' "${BOOTC_GPG_SHA256}" "${keyring}" | sha256sum -c - \
         && printf 'Types: deb\nArchitectures: %s\nURIs: %s/\nSuites: %s\nComponents: main\nEnabled: yes\nSigned-By: %s\n' \
             "$(dpkg --print-architecture)" "${url}" "${VERSION_CODENAME}" "${keyring}" \
