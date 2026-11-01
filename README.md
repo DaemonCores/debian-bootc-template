@@ -60,6 +60,10 @@ What each YAML file does, how the pipeline reads it and how to extend the templa
 
 `make check` runs yamllint, hadolint and the tests manifest check, the same entry point as the `Lint` workflow. Every boot test needs a `diag`; the pipeline refuses a manifest without one.
 
+## Working with an AI assistant
+
+`CLAUDE.md` and `.claude/` give an AI coding assistant what it needs to work on a fork: a skill describing this repository, documentation and handoff conventions, and a hook that runs `make check` before a commit (opt out with `CLAUDE_QUALITY_HOOKS=0`). See the [wiki](../../wiki/AI-Assistance).
+
 ## Community
 
 [Contributing](CONTRIBUTING.md), [Code of Conduct](CODE_OF_CONDUCT.md), [Security](SECURITY.md), [Support](SUPPORT.md).
