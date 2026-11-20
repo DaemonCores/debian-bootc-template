@@ -5,15 +5,17 @@
 </p>
 
 <p>
-  <strong align="left">Simplify and Innovate for Everyone.</strong>
+  <strong align="left">Foundations for immutable, Debian-based distributions.</strong>
   <a href="https://github.com/DaemonCores/debian-bootc/wiki"><img align="right" src="https://img.shields.io/badge/Wiki-FFFFFF?style=for-the-badge&logoColor=white" alt="Documentation"/></a>
   <a href="https://github.com/orgs/DaemonCores/discussions"><img align="right" src="https://img.shields.io/badge/Community-000000?style=for-the-badge&logoColor=white" alt="Community"/></a>
   <a href="https://github.com/DaemonCores/debian-bootc"><img align="right" src="https://img.shields.io/badge/Base_debian_for_all_project-A81D33?style=for-the-badge&logo=debian&logoColor=white" alt="Debian Bootc"/></a>
   
-  <em>Identify gaps and fill them, make improvements where possible, but above all, empower developers to offer more to users.</em>
+  <em>Bring the atomic operating-system model to the Debian ecosystem, server side included.</em>
 </p>
 
 ---
+
+> **Status.** Part of the Debian bootc Developer Alpha. The structure follows what `proxmox-ve-bootc` and `DaemonCores-VE` already use on `debian-bootc`, but this template cannot be expected to work end to end until the `debian-bootc` base and its CI are repaired. Treat the steps below as documented, to be re-tested.
 
 Starting point for a bootable image built on
 [debian-bootc](https://github.com/DaemonCores/debian-bootc). The pipeline logic
